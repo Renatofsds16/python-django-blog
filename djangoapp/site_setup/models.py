@@ -1,8 +1,6 @@
 from django.db import models
-
+from utils.model_validate import validate_png
 # Create your models here.
-from django.db import models
-
 
 class MenuLink(models.Model):
     class Meta:
@@ -34,7 +32,14 @@ class SiteSetup(models.Model):
     show_description = models.BooleanField(default=True)
     show_pagination = models.BooleanField(default=True)
     show_footer = models.BooleanField(default=True)
-    favicon = models.ImageField(upload_to='assets/favicon/%Y%m',blank=True,default='')
+    favicon = models.ImageField(
+        upload_to='assets/favicon/%Y%m',blank=True,default='',
+        validators=[validate_png]
+        )
+    
+    def save(self,*args, **kwargs):
+        current_favicon_name = str(self.favicon.name)
+        return super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
