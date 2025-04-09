@@ -1,5 +1,6 @@
 from django.db import models
 from utils.model_validate import validate_png
+from utils.image import resize_image
 # Create your models here.
 
 class MenuLink(models.Model):
@@ -39,7 +40,14 @@ class SiteSetup(models.Model):
     
     def save(self,*args, **kwargs):
         current_favicon_name = str(self.favicon.name)
-        return super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
+        favicon_change = False
+        if self.favicon:
+            favicon_change = current_favicon_name != self.favicon.name
+
+        if favicon_change:
+            resize_image(self.favicon,32)
+
 
     def __str__(self):
         return self.title
