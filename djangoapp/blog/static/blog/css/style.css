@@ -198,7 +198,9 @@
   .center {
     text-align: center;
   }
-  
+  .CodeMirror {
+      height: auto !important;
+  }
   .separator {
     background: hsl(var(--clr-gray-ltst));
     width: 50%;

@@ -12,12 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR.parent / 'data' / 'web'
 
-
+load_dotenv(BASE_DIR.parent / 'dotenv_files' / '.env',override=True)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'blog',
     'site_setup',
+    'django_summernote',
+    'axes'
 ]
 
 MIDDLEWARE = [
@@ -54,6 +57,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # AxesMiddleware should be the last middleware in the MIDDLEWARE list.
+    # It only formats user lockout messages and renders Axes lockout responses
+    # on failed user authentication attempts from login views.
+    # If you do not want Axes to override the authentication response
+    # you can skip installing the middleware and use your own views.
+    'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -136,3 +145,38 @@ MEDIA_ROOT = DATA_DIR / 'media'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+AUTHENTICATION_BACKENDS = [
+    # AxesStandaloneBackend should be the first backend in the AUTHENTICATION_BACKENDS list.
+    'axes.backends.AxesStandaloneBackend',
+
+    # Django ModelBackend is the default authentication backend.
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SUMMERNOTE_CONFIG = {
+    'summernote': {
+        # Toolbar customization
+        # https://summernote.org/deep-dive/#custom-toolbar-popover
+        'toolbar': [
+            ['style', ['style', ]],
+            ['font', ['bold', 'italic', 'clear']],
+            ['color', ['color']],
+            ['para', ['ul', 'ol', 'paragraph', 'hr', ]],
+            ['table', ['table']],
+            ['insert', ['link', 'picture']],
+            ['view', ['fullscreen', 'codeview', 'undo', 'redo']],
+        ],
+        'codemirror': {
+            'mode': 'htmlmixed',
+            'lineNumbers': 'true',
+            'lineWrapping': 'true',
+            'theme': 'dracula',
+        },
+    },
+    'css': (
+        '//cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/dracula.min.css',
+    ),
+    'attachment_filesize_limit': 30 * 1024 * 1024,
+    'attachment_model': 'blog.PostAttachment',
+}
